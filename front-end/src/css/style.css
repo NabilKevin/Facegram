@@ -1,0 +1,78 @@
+a {
+    text-decoration: none;
+    color: inherit;
+    color: #333;
+}
+a:hover {
+    text-decoration: underline;
+}
+.navbar {
+    background: #FFF !important;
+    border-bottom: 1px solid #ddd;
+}
+
+.explore-people {
+    position: sticky;
+    top: 5rem;
+}
+.explore-people-list, .request-follow-list {
+    padding-right: 1rem;
+    max-height: 500px;
+    overflow-y: auto
+}
+
+.profile-label {
+    cursor: default;
+}
+.profile-dropdown {
+    position: relative;
+}
+.profile-dropdown .card {
+    padding-right: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-top: 0.5rem;
+}
+.profile-list {
+    display: none;
+    right: 0;
+    min-width: 180px;
+    position: absolute;
+    z-index: 9;
+}
+.profile-dropdown:hover .profile-list {
+    display: block;
+}
+.profile-user:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+.card-images {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+.card-images img {
+    scroll-snap-align: start;
+}
+
+@media (min-width: 1400px) {
+    .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+        max-width: 1000px;
+    }
+}
+
+.center {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: absolute;
+    z-index: 4000;
+    background-color: white;
+    inset: 0;
+}
+.center * {
+    font-size: 60px;
+}

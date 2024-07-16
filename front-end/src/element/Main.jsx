@@ -1,0 +1,7 @@
+export {default as Home} from './page/Home'
+export {default as Login} from './page/Login'
+export {default as Register} from './page/Register'
+export {default as Profile} from './page/Profile'
+export {default as CreatePost} from './page/CreatePost'
+export {default as Loading} from './page/Loading'
+export {default as Navbar} from './partials/Navbar'
