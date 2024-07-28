@@ -5,47 +5,55 @@ import {Routes, Route} from 'react-router-dom'
 import axios from 'axios';
 
 function App() {
-  const [authData, setAuthData] = useState();
+  axios.defaults.withCredentials = true;
   const [error, setError] = useState();
-  const [loading, setLoading] = useState(false);
-  const AuthController = method => {
-    axios.post(`http://localhost:8000/api/v1/auth/${method}`, authData)
-      .then(res => {
-        const data = res.data;
-        localStorage.setItem('token', data['token'])
-        localStorage.setItem('username', data['user']['username'])
-        location.replace('/')
-      })
-      .catch(err => {
-        setError(err.response.data.errors);
-      })
-  }
-  const logout = () => {
-    axios.post('http://localhost:8000/api/v1/auth/logout', {},
-      {
-        headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('token') 
+  const [loading, setLoading] = useState(true);
+  const AuthController = async (e, method) => {
+    e.preventDefault()
+    try {
+      const authdata = {}
+      Array.from(e.target).forEach(e => {
+        if(e.tagName.toLowerCase() !== 'button') {
+          if(e.type.toLowerCase() === 'checkbox') {
+            authdata[e.name] = e.checked
+          } else {
+            authdata[e.name] = e.value
+          }
         }
-      }
-    )
-      .then(res => {
-        localStorage.clear()
-        location.replace('/login')
       })
-  }
-  const changeInput = (e, setData, data) => {
-    setData({...data, [e.target.name]: e.target.value})
-  }
-  useEffect(() => {
-    setLoading(true)
-    const token = localStorage.getItem('token');
-    const path = location.pathname.split('/');
-    if((path[1] === 'login' || path[1] === 'register') && token) {
+      const response = await axios.post(`http://localhost:8000/api/v1/auth/${method}`, authdata)
+      const data = response.data;
+      localStorage.setItem('username', data['user']['username'])
       location.replace('/')
+    } catch(err) {
+      setError(err.response.data);
     }
-    if((path.length > 2 || (path[1] !== 'login' && path[1] !== 'register')) && !token) {
+  }
+  const logout = async () => {
+    const response = await axios.post('http://localhost:8000/api/v1/auth/logout', {})
+    if(response.status === 200) {
       location.replace('/login')
     }
+  }
+  
+  useEffect(() => {
+    const checkAuth = async () => {
+      const path = location.pathname.split('/')
+      try {
+        const response = await axios.get('http://localhost:8000/api/v1/checkAuth', {})
+        if(response.status === 200) {
+          if(path[1] === 'login' || path[1] === 'register') {
+            location.replace('/')
+          }
+        }
+      } catch {
+        if(path.length > 2 || (path[1] !== 'login' && path[1] !== 'register')) {
+          location.replace('/login')
+        }
+        setLoading(false)
+      }
+    }
+    checkAuth();
   }, []);
   return (
     <>
@@ -55,10 +63,10 @@ function App() {
       <Navbar logout={logout} />
       <Routes>
         <Route path='/' element={<Home setLoading={setLoading} />} />
-        <Route path='/login' element={<Login authData={authData} AuthController={AuthController} setAuthData={setAuthData} changeInput={changeInput} error={error} setLoading={setLoading} />} />
-        <Route path='/register' element={<Register authData={authData} AuthController={AuthController} setAuthData={setAuthData} changeInput={changeInput} error={error} setLoading={setLoading} />} />
+        <Route path='/login' element={<Login AuthController={AuthController} error={error} />} />
+        <Route path='/register' element={<Register AuthController={AuthController} error={error} />} />
         <Route path='/profile/*' element={<Profile setLoading={setLoading} />} />
-        <Route path='/create' element={<CreatePost changeInput={changeInput} error={error} setError={setError} setLoading={setLoading} />} />
+        <Route path='/create' element={<CreatePost error={error} setError={setError} setLoading={setLoading} />} />
       </Routes>
     </>
   )

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Like;
 use App\Models\Post;
+use App\Models\Comment;
+use Illuminate\Http\Request;
 use App\Models\PostAttachments;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -28,7 +30,7 @@ class PostController extends Controller
 
         $data = $validate->getData();
 
-        $data['user_id'] = Auth::user()->id;
+        $data['user_id'] = $request->user->id;
 
         $post = Post::create($data);
 
@@ -45,11 +47,11 @@ class PostController extends Controller
         ], 200);
     }
 
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $post = Post::find($id);
         if($post) {
-            if($post->user_id === Auth::user()->id) {
+            if($post->user_id === $request->user->id) {
                 $post->delete();
                 return response()->json([], 204);
             } else {
@@ -83,20 +85,72 @@ class PostController extends Controller
         $data['size'] = $data['size'] ?? 10;
 
         $id = [];
-        foreach(Auth::user()->followers as $f) {
+        foreach($request->user->followers as $f) {
             if($f->is_accepted === 1) {
                 array_push($id, $f->following_id);
             }
         }
-        array_push($id, Auth::user()->id);
+        array_push($id, $request->user->id);
 
-        $posts = Post::with(['user', 'attachments'])->whereIn('user_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC');
+        $posts = Post::with(['user', 'attachments', 'likes'])->whereIn('user_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC');
         $data['size'] = Count($posts) < $data['size'] ? Count($posts) : $data['size'];
+
+        foreach($posts as $post) {
+            $post['total_like'] = Count($post->likes);
+            $post['you_liked'] = $post->likes->firstWhere('user_id', $request->user->id) ? true : false;
+        }
 
         return response()->json([
             'page' => $data['page'],
             'size' => $data['size'],
             'posts' => $posts->skip($data['page'] * $data['size'])->take($data['size'])->values()
+        ], 200);
+    }
+    public function like(Request $request, $id)
+    {
+        $data = [
+            'user_id' => $request->user->id,
+            'post_id' => $id
+        ];
+        Like::create($data);
+        return response()->json([
+            'message' => 'like post success'
+        ], 200);
+    }
+    public function unlike(Request $request, $id)
+    {
+        $like = Like::where('user_id', $request->user->id)->firstWhere('post_id', $id);
+        if($like) {
+            $like->delete();
+            return response()->json([
+                'message' => 'unlike post success'
+            ], 200);
+        }
+        return response()->json([
+            'message' => 'You are not like a post'
+        ], 422);
+    }
+    public function comment(Request $request, $id) {
+        $validator = Validator::make($request->all(), [
+            'comment_body' => 'required'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json([
+                'message' => 'Invalid field',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->getData();
+
+        $data['post_id'] = $id;
+        $data['user_id'] = $request->user->id;
+
+        Comment::create($data);
+
+        return response()->json([
+            'message' => 'Comment success'
         ], 200);
     }
 }

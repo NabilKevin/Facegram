@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Cookie;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -32,13 +34,17 @@ class AuthController extends Controller
 
         $user = User::create($data);
 
-        $token = $user->createToken('user login');
+        $token = $user->createToken('user login')->plainTextToken;
+
+        Auth::login($user);
+
+        $cookie = cookie('sessionToken', json_encode([hash('md5', 'token') => $token, hash('md5', 'username') => $user->username]), 60 * 24);
 
         return response()->json([
             'message' => 'Login success',
-            'token' => $token->plainTextToken,
+            'token' => $token,
             'user' => $user->only(['full_name', 'bio', 'username', 'is_private', 'id'])
-        ], 200);
+        ], 200)->cookie($cookie);
     }
 
     public function login(Request $request)
@@ -56,13 +62,17 @@ class AuthController extends Controller
         $data = $validate->getData();
         if(Auth::validate($data)) {
             $user = User::firstWhere('username', $data['username']);
-            $token = $user->createToken('user login');
+            $token = $user->createToken('user login')->plainTextToken;
+
+            Auth::login($user);
+
+            $cookie = cookie('sessionToken', json_encode([hash('md5', 'token') => $token, hash('md5', 'username') => $user->username]), 60 * 24);
 
             return response()->json([
                 'message' => 'Login success',
-                'token' => $token->plainTextToken,
+                'token' => $token,
                 'user' => $user->only(['id', 'full_name', 'username', 'bio', 'is_private', 'created_at'])
-            ], 200);
+            ], 200)->cookie($cookie);
         }
         return response()->json([
             'message' => 'Wrong username or password'
@@ -71,10 +81,15 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        PersonalAccessToken::findToken($request->token)->delete();
 
         return response()->json([
             'message' => 'Logout success'
-        ], 200);
+        ], 200)->cookie('sessionToken', null, 0);
+    }
+
+    public function checkAuth()
+    {
+        return response()->json([], 200);
     }
 }

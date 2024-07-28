@@ -76,3 +76,102 @@ a:hover {
 .center * {
     font-size: 60px;
 }
+.pointer {
+    cursor: pointer;
+}
+.scale-15 {
+    transform: scale(1.5);
+}
+
+@keyframes heartDisappear {
+    0% {
+        transform: scale(1.5);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+@keyframes heartAppear {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1.5);
+    }
+}
+@keyframes heartAlreadyLike {
+    0% {
+        transform: scale(1.5);
+    }
+    50% {
+        transform: scale(1.7);
+    }
+    100% {
+        transform: scale(1.5);
+    }
+}
+@keyframes likeWithDoubleClick {
+    0% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(6);
+    }
+    75% {
+        transform: scale(6);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+.heartDisappear {
+    animation: heartDisappear .3s forwards;
+}
+.heartDisappear {
+    animation: heartAppear .3s forwards;
+}
+.heartAlreadyLike {
+    animation: heartAlreadyLike .3s forwards;
+}
+
+.bi-heart-fill {
+    color: red;
+}
+
+.likeInImg .bi-heart-fill {
+    color: white;
+    transform: scale(0);
+}
+
+.adj-top {
+    top: calc(50% - 6px *6);
+}
+
+.likeInImg .bi-heart-fill.likeWithDoubleClick {
+    animation: likeWithDoubleClick .6s forwards;
+}
+
+.detail {
+    inset: 0;
+    background-color: rgba(0, 0, 0, .7);
+    z-index: 2000;
+}
+
+.detail-post {
+    max-height: calc(100vh - 40px);
+}
+
+.postDescription {
+    max-width: 500px;
+    background-color: white;
+    min-width: 405px;
+    overflow-y: visible;
+    flex-grow: 1;
+    overflow-x: visible;
+    min-height: 0;
+}
+
+.postDescription .profile {
+    padding: 14px 4px 14px 16px;
+    box-sizing: content-box;
+}

@@ -16,9 +16,9 @@ use App\Http\Resources\GetDetailResource;
 
 class FollowController extends Controller
 {
-    public function followUser($username)
+    public function followUser($username, Request $request)
     {
-        $me = Auth::user();
+        $me = $request->user;
         $user = User::firstWhere('username', $username);
 
         if(!$user) return response()->json([
@@ -47,9 +47,9 @@ class FollowController extends Controller
         ], 200);
     }
 
-    public function unFollow($username)
+    public function unFollow($username, Request $request)
     {
-        $me = Auth::user();
+        $me = $request->user;
         $user = User::firstWhere('username', $username);
 
         if(!$user) return response()->json([
@@ -78,9 +78,9 @@ class FollowController extends Controller
             'following' => $following
         ], 200);
     }
-    public function acceptRequest($username)
+    public function acceptRequest($username, Request $request)
     {
-        $me = Auth::user();
+        $me = $request->user;
         $user = User::firstWhere('username', $username);
 
         if(!$user) return response()->json([
@@ -108,9 +108,9 @@ class FollowController extends Controller
             'followers' => $follower
         ], 200);
     }
-    public function index()
+    public function index(Request $request)
     {
-        $me = Auth::user();
+        $me = $request->user;
         $id = [];
         foreach($me->followers as $f) {
             array_push($id, $f->following_id);
@@ -119,9 +119,9 @@ class FollowController extends Controller
             'users' => User::whereNot('username', $me->username )->whereNotIn('id', $id)->get()
         ], 200);
     }
-    public function getDetailUser($username)
+    public function getDetailUser($username, Request $request)
     {
-        $me = Auth::user();
+        $me = $request->user;
         $user = User::with(['posts.attachments', 'followings', 'followers'])->firstWhere('username', $username);
 
         if(!$user) return response()->json([

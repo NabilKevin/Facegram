@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Like;
 
 class Post extends Model
 {
@@ -20,5 +21,9 @@ class Post extends Model
     public function attachments()
     {
         return $this->hasMany(PostAttachments::class, 'post_id', 'id');
+    }
+    public function likes()
+    {
+        return $this->hasMany(Like::class, 'post_id', 'id');
     }
 }
