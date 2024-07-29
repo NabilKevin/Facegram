@@ -36,8 +36,6 @@ class AuthController extends Controller
 
         $token = $user->createToken('user login')->plainTextToken;
 
-        Auth::login($user);
-
         $cookie = cookie('sessionToken', json_encode([hash('md5', 'token') => $token, hash('md5', 'username') => $user->username]), 60 * 24);
 
         return response()->json([
@@ -63,8 +61,6 @@ class AuthController extends Controller
         if(Auth::validate($data)) {
             $user = User::firstWhere('username', $data['username']);
             $token = $user->createToken('user login')->plainTextToken;
-
-            Auth::login($user);
 
             $cookie = cookie('sessionToken', json_encode([hash('md5', 'token') => $token, hash('md5', 'username') => $user->username]), 60 * 24);
 

@@ -10,7 +10,8 @@ use App\Models\PostAttachments;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\ImageManager;
 class PostController extends Controller
 {
     public function store(Request $request)
@@ -34,9 +35,11 @@ class PostController extends Controller
 
         $post = Post::create($data);
 
-        foreach($data['attachments'] as $pic) {
-            $name = $pic->getClientOriginalName();
-            $pic->storeAs('/posts', $name);
+        foreach($data['attachments'] as $image) {
+
+            $name = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('/posts', $name);
+
             PostAttachments::create([
                 'storage_path' => "posts/$name",
                 'post_id' => $post->id]);

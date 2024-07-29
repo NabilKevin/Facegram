@@ -10,20 +10,20 @@ const CreatePost = ({error, setError, setLoading}) => {
 	const create = async e => {
 		e.preventDefault()
 		if(!isUploading) {
+			isUploading = true	
 			const formData = {}
 			Array.from(e.target).forEach(e => {
-					if(e.tagName.toLowerCase() !== 'button') {
-						if(e.name !== 'attachments') {
-							formData[e.name] = e.value
-						} else {
-							formData[e.name] = []
-							for(const image in e.files) {
-								formData[e.name] = [...formData[e.name], e.files[image]]
-							}
-						}
+				if(e.tagName.toLowerCase() !== 'button') {
+					if(e.name !== 'attachments') {
+						formData[e.name] = e.value
+					} else {
+						formData[e.name] = []
+						Array.from(e.files).forEach (image => {
+							formData[e.name] = [...formData[e.name], image]
+						})
 					}
-				})
-			isUploading = true	
+				}
+			})
 			try {
 				await axios.post('http://localhost:8000/api/v1/posts', formData, { headers: { 'Content-Type': 'multipart/form-data' }, withCredentials: true });
 				location.replace('/')

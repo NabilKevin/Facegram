@@ -83,28 +83,23 @@ a:hover {
     transform: scale(1.5);
 }
 
-@keyframes heartDisappear {
-    0% {
-        transform: scale(1.5);
-    }
-    100% {
-        transform: scale(0);
-    }
-}
-@keyframes heartAppear {
-    0% {
-        transform: scale(0);
-    }
-    100% {
-        transform: scale(1.5);
-    }
-}
 @keyframes heartAlreadyLike {
     0% {
         transform: scale(1.5);
     }
     50% {
         transform: scale(1.7);
+    }
+    100% {
+        transform: scale(1.5);
+    }
+}
+@keyframes heart {
+    0% {
+        transform: scale(1.5);
+    }
+    50% {
+        transform: scale(0);
     }
     100% {
         transform: scale(1.5);
@@ -124,11 +119,8 @@ a:hover {
         transform: scale(0);
     }
 }
-.heartDisappear {
-    animation: heartDisappear .3s forwards;
-}
-.heartDisappear {
-    animation: heartAppear .3s forwards;
+.heart {
+    animation: heart .3s forwards;
 }
 .heartAlreadyLike {
     animation: heartAlreadyLike .3s forwards;
@@ -174,4 +166,67 @@ a:hover {
 .postDescription .profile {
     padding: 14px 4px 14px 16px;
     box-sizing: content-box;
+    border-bottom: 1px solid rgb(236, 236, 236);
+}
+
+.comments {
+    min-height: 580px;
+    max-height: 580px;
+    padding: 14px 4px 14px 16px;
+    box-sizing:border-box;
+    height: calc(100% - 32px);
+}
+
+.scale-18 {
+    transform: scale(1.8);
+}
+
+.postDescription .totalLikes {
+    font-size: 1rem;
+}
+.postDescription .time {
+    font-size: .8rem;
+}
+.buttons {
+    border-bottom: 1px solid rgb(236, 236, 236);
+    border-top: 1px solid rgb(236, 236, 236);
+}
+
+.inputComment input {
+    border: none;
+    padding: 15px 5px;
+    outline: none;
+    font-size: 1rem;
+}
+.inputComment button {
+    border: none;
+    padding: 15px 15px;
+    outline: none;
+    background-color: transparent;
+}
+
+.postImg {
+    max-height: 1002px;
+    aspect-ratio: 1410 / 1549;
+    min-height: 450px;
+    max-width: 912.085px;
+    height: 805px;
+}
+
+.commentss {
+    overflow: auto;
+}
+
+.xBtn {
+    right: 1%;
+    top: 1%;
+    color: white;
+}
+
+.comment {
+    font-size: 14px;
+}
+
+.comment .description {
+    font-weight: 600;
 }

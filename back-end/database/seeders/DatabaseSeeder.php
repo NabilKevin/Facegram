@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        for($i = 1; $i <= 102; $i++) {
+        for($i = 1; $i <= 99; $i++) {
             Like::create([
                 'user_id' => $i,
                 'post_id' => 602
