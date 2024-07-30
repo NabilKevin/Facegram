@@ -230,3 +230,7 @@ a:hover {
 .comment .description {
     font-weight: 600;
 }
+
+.default {
+    cursor:none;
+}

@@ -95,11 +95,12 @@ class PostController extends Controller
         }
         array_push($id, $request->user->id);
 
-        $posts = Post::with(['user', 'attachments', 'likes'])->whereIn('user_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC');
+        $posts = Post::with(['user', 'attachments', 'likes', 'comments'])->whereIn('user_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC');
         $data['size'] = Count($posts) < $data['size'] ? Count($posts) : $data['size'];
 
         foreach($posts as $post) {
             $post['total_like'] = Count($post->likes);
+            $post['total_comment'] = Count($post->comments);
             $post['you_liked'] = $post->likes->firstWhere('user_id', $request->user->id) ? true : false;
         }
 
@@ -154,6 +155,14 @@ class PostController extends Controller
 
         return response()->json([
             'message' => 'Comment success'
+        ], 200);
+    }
+    public function getComment($id)
+    {
+        $comments = Comment::with('user')->where('post_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC');
+        return response()->json([
+            'message' => 'Get comment success',
+            'comments' => $comments
         ], 200);
     }
 }

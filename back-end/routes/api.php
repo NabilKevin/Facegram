@@ -25,6 +25,7 @@ Route::prefix('v1')->group(function() {
             Route::post('/{id}/like', [PostController::class, 'like']);
             Route::post('/{id}/unlike', [PostController::class, 'unlike']);
             Route::post('/{id}/comment', [PostController::class, 'comment']);
+            Route::get('/{id}/comment', [PostController::class, 'getComment']);
         });
 
         Route::prefix('users')->group(function() {

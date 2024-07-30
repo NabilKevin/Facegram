@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comments', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('post_id');
-            $table->unsignedBigInteger('comment_id')->nullable();
-            $table->string('comment_body');
-            $table->timestamps();
+        // Schema::create('comments', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->unsignedBigInteger('user_id');
+        //     $table->unsignedBigInteger('post_id');
+        //     $table->unsignedBigInteger('comment_id')->nullable();
+        //     $table->string('comment_body');
+        //     $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('post_id')->references('id')->on('posts');
-            $table->foreign('comment_id')->references('id')->on('comments');
-        });
+        //     $table->foreign('user_id')->references('id')->on('users');
+        //     $table->foreign('post_id')->references('id')->on('posts');
+        //     $table->foreign('comment_id')->references('id')->on('comments');
+        // });
     }
 
     /**

@@ -4,8 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Like;
+use App\Models\Comment;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Faker\Factory as Faker;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,18 +22,25 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-
-        for($i = 1; $i <= 99; $i++) {
-            Like::create([
-                'user_id' => $i,
-                'post_id' => 602
-            ]);
+        $faker = Faker::create();
+        for($i = 1; $i <= 50; $i++) {
+            $max = mt_rand(0, 50);
+            for($ii = 1; $ii <= $max; $ii++) {
+                Like::create([
+                    'user_id' => $ii,
+                    'post_id' => $i
+                ]);
+            }
         }
-        for($i = 1; $i <= 51; $i++) {
-            Like::create([
-                'user_id' => $i,
-                'post_id' => 603
-            ]);
+        for($i = 1; $i <= 50; $i++) {
+            $max = mt_rand(0, 50);
+            for($ii = 1; $ii <= $max; $ii++) {
+                Comment::create([
+                    'user_id' => $ii,
+                    'post_id' => $i,
+                    'comment_body' => $faker->sentence
+                ]);
+            }
         }
     }
 }

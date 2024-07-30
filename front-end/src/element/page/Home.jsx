@@ -9,37 +9,43 @@ const Home = ({setLoading}) => {
 	const [request, setRequest] = useState([]);
 	const [like, setLike] = useState({like: [], withDoubleClick: []});
 	const [comment, setComment] = useState({comment: [], data: null, index: null})
+	const [commentBody, setCommentBody] = useState('');
 	let isload = false
 	let page = 0
 	const getPosts = async () => { 
-			const response = await axios.get(`http://localhost:8000/api/v1/posts?page=${page}&size=10`)
-			response.data.posts.forEach(i => {
-					setPosts(prevPosts => [...prevPosts, i])
-					setLike(prev => ({like: [...prev.like, 0], withDoubleClick: [...prev.withDoubleClick, false]}))
-			})
+		const response = await axios.get(`http://localhost:8000/api/v1/posts?page=${page}&size=10`)
+		response.data.posts.forEach(i => {
+			setPosts(prevPosts => [...prevPosts, i])
+			setLike(prev => ({like: [...prev.like, 0], withDoubleClick: [...prev.withDoubleClick, false]}))
+		})
+	}
+	const storeComment = async (e, data, id, index) => {
+		e.preventDefault()
+		const response = await axios.post(`http://localhost:8000/api/v1/posts/${id}/comment`, {comment_body: commentBody})
+		if(response.status === 200) {
+			setCommentBody('')
+			openComment(data, index)
+		}
 	}
 	const getUsers = async () => { 
 			const response = await axios.get('http://localhost:8000/api/v1/users')
 			setUsers(prev => [...prev, ...response.data.users])
 	}
 	const getRequest = async () => { 
-			const response = await axios.get(`http://localhost:8000/api/v1/users/${localStorage.getItem('username')}/followers`)
-			const data = response.data.followers.filter(r => r.is_requested === true)
-			setRequest(prev => [...prev, ...data])
+		const response = await axios.get(`http://localhost:8000/api/v1/users/${localStorage.getItem('username')}/followers`)
+		const data = response.data.followers.filter(r => r.is_requested === true)
+		setRequest(prev => [...prev, ...data])
 	}
 	const scrollDown = e => {
-			if(Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight) {
-					if(!isload) {
-							isload = true
-							page += 1;
-							getPosts();
-							isload = false
-					}
+		if(Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight) {
+			if(!isload) {
+				isload = true
+				page += 1;
+				getPosts();
+				isload = false
 			}
+		}
 	}
-	useEffect(() => {
-		console.log(like);
-	}, [like])
 	useEffect(() => {
 		if(comment.data) {
 			document.body.style.overflow = 'hidden';
@@ -60,32 +66,36 @@ const Home = ({setLoading}) => {
 			window.addEventListener('scroll', scrollDown)
 	}, [])
 
-	const openComment = (data, index) => {
-		setComment({comment: [1], data, index})
+	const openComment = async (data, index) => {
+		const response = await axios.get(`http://localhost:8000/api/v1/posts/${data.id}/comment`)
+		const comments = []
+		for(const comment in response.data.comments) {
+			comments.push(response.data.comments[comment])
+		}
+		setComment({comment: comments, data, index})
 	}
 
 	const acceptRequest = async username => {
-			try {
-					const response = await axios.put(`http://localhost:8000/api/v1/users/${username}/accept`, {})
-					setRequest(response => response.filter(r => r.username !== username))
-			} catch(err) {
-					console.error(err);
-			}
+		try {
+			const response = await axios.put(`http://localhost:8000/api/v1/users/${username}/accept`, {})
+			setRequest(response => response.filter(r => r.username !== username))
+		} catch(err) {
+			console.error(err);
+		}
 			
 	}
-	const timeAgo = (dateString) => {
+	const timeAgo = (dateString, comment) => {
 			const date = new Date(dateString);
 			const now = new Date();
-			const secondsPast = (now.getTime() - date.getTime()) / 1000;
-		
+			const secondsPast = (now - date) / 1000;
 			if (secondsPast < 60) {
-				return `${Math.round(secondsPast)} seconds ago`;
+				return `${Math.round(secondsPast)} ${comment ? 's' : 'seconds ago'}`;
 			}
 			if (secondsPast < 3600) {
-				return `${Math.round(secondsPast / 60)} minutes ago`;
+				return `${Math.round(secondsPast / 60)} ${comment ? 'm' : 'minutes ago'}`;
 			}
 			if (secondsPast <= 86400) {
-				return `${Math.round(secondsPast / 3600)} hours ago`;
+				return `${Math.round(secondsPast / 3600)} ${comment ? 'h' : 'hours ago'}`;
 			}
 			if (secondsPast > 86400) {
 				const day = date.getDate();
@@ -105,6 +115,25 @@ const Home = ({setLoading}) => {
 		if(response.status !== 200) {
 			console.error(response);
 		}
+	}
+	const handleHeartClickComment = (e, id, i) => {
+		e.target.classList.toggle('heart')
+		setTimeout(() => {
+			if(e.target.classList.contains('bi-heart')) {
+				likePost(id);
+				const temp = structuredClone(like)
+				temp.like[i] += 1
+				setLike(temp);
+			} else {
+				unlikePost(id);
+				const temp = structuredClone(like)
+				temp.like[i] -= 1
+				setLike(temp);
+			}
+		}, 220)
+		setTimeout(() => {
+			e.target.classList.toggle('heart')
+		}, 320)
 	}
 	const handleHeartClick = (e, id, i) => {
 		e.target.classList.toggle('heart')
@@ -130,7 +159,7 @@ const Home = ({setLoading}) => {
 	const handleLike = (e, id, i) => {
 		const heart = e.target.parentElement.nextSibling.children[0]
 		const temp = structuredClone(like)
-		if(heart.classList.contains('bi-heart')) {
+		if((heart.classList.contains('bi-heart') && temp.like[i] < 1) || temp.like[i] < 0) {
 			temp.like[i] += 1
 			temp.withDoubleClick[i] = true
 			setLike(prev => temp);
@@ -173,7 +202,7 @@ const Home = ({setLoading}) => {
 							<div className="card-body h-100">
 								<div className="card-images mb-2 h-100">
 									{
-										comment.data.attachments.map((a, ii) => <img onDoubleClick={e => handleLike(e, comment.data.id, i)} key={ii} src={`http://localhost:8000/storage/${a.storage_path}`} alt="image" className='h-100 w-100 left-0'/>)
+										comment.data.attachments.map((a, ii) => <img onDoubleClick={e => handleLike(e, comment.data.id, comment.index)} key={ii} src={`http://localhost:8000/storage/${a.storage_path}`} alt="image" className='h-100 w-100 left-0'/>)
 									}	
 								</div>
 							</div>
@@ -183,24 +212,27 @@ const Home = ({setLoading}) => {
 						<div className="profile position-relative top-0">
 							<strong>{comment.data.user.username}</strong>
 						</div>
-						<div className="comments d-flex gap-2 align-items-center flex-column">
+						<div className="comments d-flex gap-2 align-items-start flex-column">
 							<div className="commentss gap-3 d-flex flex-column">
 								<div className="caption">
 									<strong>{comment.data.user.username}</strong> {comment.data.caption}
 								</div>
-								<div className="comment d-flex flex-column">
-									<div className="commentBody mb-1">
-									<strong>nabilkevin07</strong> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sint ipsum dolore nam a cupiditate numquam quae tenetur nihil animi autem.
-									</div>
-									<div className="description d-flex gap-2">
-										<small className='text-muted'>4d</small><small className='text-muted'>10,000 likes</small><small className='text-muted'>Reply</small>
-									</div>
-								</div>
+								{
+									comment.comment.map((comment, i) => (
+										<div className="comment d-flex flex-column" key={i}>
+											<div className="commentBody mb-1">
+											<strong>{comment.user.username}</strong> {comment.comment_body}
+											</div>
+											<div className="description d-flex gap-2">
+												<small className='text-muted'>{timeAgo(comment.created_at, true)}</small><small className='text-muted'>0 likes</small><small className='text-muted'>Reply</small>
+											</div>
+										</div>))
+								}
 							</div>
 						</div>
 						<div className="buttons">
 							<div className="d-flex gap-4 p-3">
-								<i className={`bi bi-heart${comment.data.you_liked || like.like[comment.index] > 0 ? '-fill' : ''} pointer scale-18`} onClick={e => handleHeartClick(e, comment.data.id, comment.index)}></i>
+								<i className={`bi bi-heart${like.like[comment.index] !== -1 && (like.like[comment.index] === 1 || comment.data.you_liked)  ? '-fill' : ''} pointer scale-18`} onClick={e => handleHeartClickComment(e, comment.data.id, comment.index)}></i>
 								<i className="bi bi-chat pointer scale-18"></i>
 							</div>
 							<div className="d-flex flex-column p-2 m-1 mt-0 pt-0 gap-0">
@@ -208,19 +240,19 @@ const Home = ({setLoading}) => {
 								<span className='text-muted time'>{timeAgo(comment.data.created_at)}</span>
 							</div>
 						</div>
-						<div className="inputComment d-flex gap-0 align-items-center justify-content-center">
-							<button className='h-100'>
-								<svg aria-label="Emoji" className="x1lliihq x1n2onr6 x5n08af" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Emoji</title>
-									<path d="M15.83 10.997a1.167 1.167 0 1 0 1.167 1.167 1.167 1.167 0 0 0-1.167-1.167Zm-6.5 1.167a1.167 1.167 0 1 0-1.166 1.167 1.167 1.167 0 0 0 1.166-1.167Zm5.163 3.24a3.406 3.406 0 0 1-4.982.007 1 1 0 1 0-1.557 1.256 5.397 5.397 0 0 0 8.09 0 1 1 0 0 0-1.55-1.263ZM12 .503a11.5 11.5 0 1 0 11.5 11.5A11.513 11.513 0 0 0 12 .503Zm0 21a9.5 9.5 0 1 1 9.5-9.5 9.51 9.51 0 0 1-9.5 9.5Z"></path>
-								</svg>
-							</button>
-							<input type="text" className='w-100 h-100' placeholder='Add Comment...'/>
-							<button className='h-100 text-info'>
-								Post
-							</button>
+							<form onSubmit={e => storeComment(e, comment.data, comment.data.id, comment.index)} className="inputComment d-flex gap-0 align-items-center justify-content-center">
+								<button className='h-100'>
+									<svg aria-label="Emoji" className="x1lliihq x1n2onr6 x5n08af" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Emoji</title>
+										<path d="M15.83 10.997a1.167 1.167 0 1 0 1.167 1.167 1.167 1.167 0 0 0-1.167-1.167Zm-6.5 1.167a1.167 1.167 0 1 0-1.166 1.167 1.167 1.167 0 0 0 1.166-1.167Zm5.163 3.24a3.406 3.406 0 0 1-4.982.007 1 1 0 1 0-1.557 1.256 5.397 5.397 0 0 0 8.09 0 1 1 0 0 0-1.55-1.263ZM12 .503a11.5 11.5 0 1 0 11.5 11.5A11.513 11.513 0 0 0 12 .503Zm0 21a9.5 9.5 0 1 1 9.5-9.5 9.51 9.51 0 0 1-9.5 9.5Z"></path>
+									</svg>
+								</button>
+								<input type="text" className='w-100 h-100' placeholder='Add Comment...' value={commentBody} onChange={e => setCommentBody(prev => e.target.value)}/>
+								<button className={`h-100 text-${commentBody.length === 0 ? 'info' : 'primary'}`} disabled={commentBody.length === 0 ? true: false} type='submit'>
+									Post
+								</button>
+							</form>
 						</div>
 					</div>
-				</div>
 			</div>}
 			<div className="container py-5">
 				<div className="row justify-content-between">
@@ -249,7 +281,7 @@ const Home = ({setLoading}) => {
 									</div>
 									<strong>{r.total_like + like.like[i]} likes</strong>
 									<p className="mb-0 text-muted"><b><a href={`/profile/${r.user.username}`}>{r.user.username}</a></b> {r.caption}</p>
-									<span className='text-muted pointer' onClick={() => openComment(r, i)}>View all 370 comments</span>
+									{r.total_comment > 0 && <span className='text-muted pointer' onClick={() => openComment(r, i)}>View all {r.total_comment} comments</span>}
 								</div>
 							</div>
 						</div>)}
