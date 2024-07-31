@@ -22,8 +22,8 @@ const Home = ({setLoading}) => {
 	const storeComment = async (e, data, id, index) => {
 		e.preventDefault()
 		const response = await axios.post(`http://localhost:8000/api/v1/posts/${id}/comment`, {comment_body: commentBody})
+		console.log('panggil');
 		if(response.status === 200) {
-			setCommentBody('')
 			openComment(data, index)
 		}
 	}
@@ -67,6 +67,7 @@ const Home = ({setLoading}) => {
 	}, [])
 
 	const openComment = async (data, index) => {
+		setCommentBody('')
 		const response = await axios.get(`http://localhost:8000/api/v1/posts/${data.id}/comment`)
 		const comments = []
 		for(const comment in response.data.comments) {
@@ -224,7 +225,7 @@ const Home = ({setLoading}) => {
 											<strong>{comment.user.username}</strong> {comment.comment_body}
 											</div>
 											<div className="description d-flex gap-2">
-												<small className='text-muted'>{timeAgo(comment.created_at, true)}</small><small className='text-muted'>0 likes</small><small className='text-muted'>Reply</small>
+												<small className='text-muted'>{timeAgo(comment.created_at, true)}</small><small className='text-muted'>0 like</small><small className='text-muted'>Reply</small>
 											</div>
 										</div>))
 								}
@@ -236,7 +237,7 @@ const Home = ({setLoading}) => {
 								<i className="bi bi-chat pointer scale-18"></i>
 							</div>
 							<div className="d-flex flex-column p-2 m-1 mt-0 pt-0 gap-0">
-								<strong className='totalLikes'>{comment.data.total_like + like.like[comment.index]} likes</strong>
+								<strong className='totalLikes'>{comment.data.total_like + like.like[comment.index]} like{comment.data.total_like + like.like[comment.index] <= 1 ? '' : 's'}</strong>
 								<span className='text-muted time'>{timeAgo(comment.data.created_at)}</span>
 							</div>
 						</div>
@@ -279,7 +280,7 @@ const Home = ({setLoading}) => {
 										<i className={`bi bi-heart${r.you_liked ? '-fill' : ''} pointer scale-15`} onClick={e => handleHeartClick(e, r.id, i)}></i>
 										<i className="bi bi-chat pointer scale-15" onClick={() => openComment(r, i)}></i>
 									</div>
-									<strong>{r.total_like + like.like[i]} likes</strong>
+									<strong>{r.total_like + like.like[i]} like{r.total_like + like.like[i] <= 1 ? '' : 's'}</strong>
 									<p className="mb-0 text-muted"><b><a href={`/profile/${r.user.username}`}>{r.user.username}</a></b> {r.caption}</p>
 									{r.total_comment > 0 && <span className='text-muted pointer' onClick={() => openComment(r, i)}>View all {r.total_comment} comments</span>}
 								</div>

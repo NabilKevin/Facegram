@@ -234,3 +234,25 @@ a:hover {
 .default {
     cursor:none;
 }
+
+.search {
+    min-height: 300px;
+    background-color: white;
+    width: 300px;
+    top: 120%;
+    left: -10%;
+    box-sizing: border-box;
+}
+
+.search input {
+    padding: 7px 10px;
+    border-radius: 5px;
+    width: 100%;
+    border: none;
+    background-color: rgb(241, 241, 241);
+    outline: none;
+}
+
+.history {
+    border-top: 1px solid white;
+}

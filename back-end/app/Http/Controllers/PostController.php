@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Drivers\Imagick\Driver;
 use Intervention\Image\ImageManager;
+
 class PostController extends Controller
 {
     public function store(Request $request)
@@ -112,6 +113,12 @@ class PostController extends Controller
     }
     public function like(Request $request, $id)
     {
+        $post = Post::find($id);
+        if(!$post) {
+            return response()->json([
+                'message' => 'Post not found'
+            ], 200);
+        }
         $data = [
             'user_id' => $request->user->id,
             'post_id' => $id
@@ -123,6 +130,12 @@ class PostController extends Controller
     }
     public function unlike(Request $request, $id)
     {
+        $post = Post::find($id);
+        if(!$post) {
+            return response()->json([
+                'message' => 'Post not found'
+            ], 200);
+        }
         $like = Like::where('user_id', $request->user->id)->firstWhere('post_id', $id);
         if($like) {
             $like->delete();
@@ -134,7 +147,14 @@ class PostController extends Controller
             'message' => 'You are not like a post'
         ], 422);
     }
-    public function comment(Request $request, $id) {
+    public function comment(Request $request, $id)
+    {
+        $post = Post::find($id);
+        if(!$post) {
+            return response()->json([
+                'message' => 'Post not found'
+            ], 200);
+        }
         $validator = Validator::make($request->all(), [
             'comment_body' => 'required'
         ]);
@@ -159,10 +179,17 @@ class PostController extends Controller
     }
     public function getComment($id)
     {
-        $comments = Comment::with('user')->where('post_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC');
+        $post = Post::find($id);
+        if(!$post) {
+            return response()->json([
+                'message' => 'Post not found'
+            ], 200);
+        }
+        $comments = Comment::with('user')->where('post_id', $id)->get()->sortBy('created_at', SORT_NATURAL, 'ASC')->values();
         return response()->json([
             'message' => 'Get comment success',
             'comments' => $comments
         ], 200);
     }
 }
+
