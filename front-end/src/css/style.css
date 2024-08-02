@@ -224,7 +224,7 @@ a:hover {
 }
 
 .comment {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .comment .description {
@@ -255,7 +255,11 @@ a:hover {
 }
 
 .history {
+    top: 15%;
+    position: absolute;
+    overflow: auto;
     border-top: 1px solid white;
+    max-height: 240px;
 }
 
 @keyframes searchAppears {
@@ -310,4 +314,20 @@ a:hover {
 }
 .searchNotActive * {
     animation: searchDisppearsContent .1s forwards ease-in-out;
+}
+.searchProfile h6 {
+    font-size: 16px;
+}
+.searchProfile span {
+    font-size: 15px;
+}
+.searchProfile:hover {
+    background-color: rgba(220, 220, 220, 0.25);
+}
+.searchProfile {
+    box-sizing: border-box;
+    padding: 5px;
+}
+.searchProfile div {
+    padding: 0 15px;
 }

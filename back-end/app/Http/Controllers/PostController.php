@@ -111,6 +111,21 @@ class PostController extends Controller
             'posts' => $posts->skip($data['page'] * $data['size'])->take($data['size'])->values()
         ], 200);
     }
+    public function show(Request $request, $id)
+    {
+        $post = Post::with(['user', 'attachments', 'likes', 'comments'])->find($id);
+        if($post) {
+            $post['total_like'] = Count($post->likes);
+            $post['total_comment'] = Count($post->comments);
+            $post['you_liked'] = $post->likes->firstWhere('user_id', $request->user->id) ? true : false;
+            return response()->json([
+                'post' => $post
+            ], 200);
+        }
+        return response()->json([
+            'message' => 'Post not found'
+        ], 404);
+    }
     public function like(Request $request, $id)
     {
         $post = Post::find($id);

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\SearchController;
 use App\Http\Middleware\checkAuth;
 
 // Route::get('/user', function (Request $request) {
@@ -35,6 +36,7 @@ Route::prefix('v1')->group(function() {
             Route::put('/{username}/accept', [FollowController::class, 'acceptRequest']);
             Route::get('/{username}/followers', [FollowController::class, 'getFollowerUser']);
             Route::get('/', [FollowController::class, 'index']);
+            Route::get('/{key}/search', [SearchController::class, 'search']);
             Route::get('/{username}', [FollowController::class, 'getDetailUser']);
         });
     });
